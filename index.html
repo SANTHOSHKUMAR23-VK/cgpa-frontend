@@ -565,12 +565,54 @@
                 }
             }
 
-            document.getElementById("downloadExcel").addEventListener("click", () => {
-                downloadFile("/export/all/excel", "all-users-cgpa.xlsx");
+            document.getElementById("downloadExcel").addEventListener("click", async () => {
+                const token = localStorage.getItem("token");
+                try {
+                    const res = await fetch(`${API_URL}/auth/users/download/excel`, {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    if (!res.ok) throw new Error("Failed to download Excel");
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "users.xlsx";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } catch (err) {
+                    console.error("Excel download error:", err);
+                    alert("Could not download Excel");
+                }
             });
 
-            document.getElementById("downloadPdf").addEventListener("click", () => {
-                downloadFile("/export/all/pdf", "all-users-cgpa.pdf");
+            document.getElementById("downloadPdf").addEventListener("click", async () => {
+                const token = localStorage.getItem("token");
+                try {
+                    const res = await fetch(`${API_URL}/auth/users/download/pdf`, {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    if (!res.ok) throw new Error("Failed to download PDF");
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "users.pdf";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } catch (err) {
+                    console.error("PDF download error:", err);
+                    alert("Could not download PDF");
+                }
             });
         </script>
 
@@ -621,7 +663,9 @@
             getCgpa: async () => {
                 const token = localStorage.getItem('token');
                 const res = await fetch(`${REACT_API_URL}/cgpa`, {
+                    method: 'GET',
                     headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     }
                 });
@@ -648,6 +692,7 @@
                 const res = await fetch(`${REACT_API_URL}/cgpa/${id}`, {
                     method: 'DELETE',
                     headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     }
                 });
